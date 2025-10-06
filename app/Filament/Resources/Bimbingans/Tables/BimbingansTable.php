@@ -92,13 +92,7 @@ class BimbingansTable
 
                 // TYPE
                 TextColumn::make('type')
-                    ->label('Jenis')
-                    ->badge()
-                    ->colors([
-                        'primary' => 'proposal',
-                        'success' => 'skripsi',
-                        'gray' => 'lainnya',
-                    ]),
+                    ->label('Jenis'),
 
                 // STATUS
                 BadgeColumn::make('status')

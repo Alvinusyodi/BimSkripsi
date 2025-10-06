@@ -27,72 +27,10 @@ class BimbinganForm
             ->components([
                 // ==================== SECTION INFORMASI BIMBINGAN ====================
                 Section::make('Informasi Bimbingan')
+                    ->columns(3) 
                     ->schema([
-                        // // FIELD MAHASISWA
-                        // Select::make('user_id')
-                        //     ->label('Mahasiswa')
-                        //     ->options(function () use ($user) {
-                        //         $query = User::query();
 
-                        //         if ($user->hasRole('mahasiswa')) {
-                        //             $query->where('id', $user->id);
-                        //         } elseif ($user->hasRole('dosen')) {
-                        //             $query->where('dosen_pembimbing_id', $user->id);
-                        //         } elseif ($user->hasRole('super_admin')) {
-                        //             $query->whereHas('roles', fn($q) => $q->where('name', 'mahasiswa'));
-                        //         }
-
-                        //         return $query->pluck('name', 'id');
-                        //     })
-                        //     ->searchable()
-                        //     ->preload()
-                        //     ->required()
-                        //     ->default(
-                        //         $user->hasRole('mahasiswa')
-                        //             ? $user->id
-                        //             : null
-                        //     )
-                        //     ->disabled(
-                        //         fn() => $user->hasRole('mahasiswa')
-                        //     )
-                        //     ->visible(
-                        //         fn() => in_array($user->getRoleNames()->first(), ['super_admin', 'dosen', 'mahasiswa'])
-                        //     )
-                        //     ->columnSpan(1),
-
-                        // // FIELD DOSEN PEMBIMBING
-                        // Select::make('dosen_id')
-                        //     ->label('Dosen Pembimbing')
-                        //     ->options(function () use ($user) {
-                        //         $query = User::query();
-
-                        //         if ($user->hasRole('mahasiswa')) {
-                        //             $query->where('id', $user->dosen_pembimbing_id);
-                        //         } elseif ($user->hasRole('dosen')) {
-                        //             $query->where('id', $user->id);
-                        //         } elseif ($user->hasRole('super_admin')) {
-                        //             $query->whereHas('roles', fn($q) => $q->where('name', 'dosen'));
-                        //         }
-
-                        //         return $query->pluck('name', 'id');
-                        //     })
-                        //     ->searchable()
-                        //     ->preload()
-                        //     ->nullable()
-                        //     ->default(
-                        //         $user->hasRole('mahasiswa')
-                        //             ? $user->dosen_pembimbing_id
-                        //             : ($user->hasRole('dosen') ? $user->id : null)
-                        //     )
-                        //     ->disabled(
-                        //         fn() => $user->hasRole('mahasiswa') || $user->hasRole('dosen')
-                        //     )
-                        //     ->visible(
-                        //         fn() => in_array($user->getRoleNames()->first(), ['super_admin', 'dosen', 'mahasiswa'])
-                        //     )
-                        //     ->columnSpan(1),
-
-                        // FIELD MAHASISWA
+                        // -------------------- MAHASISWA --------------------
                         Select::make('user_id')
                             ->label('Mahasiswa')
                             ->options(function () use ($user) {
@@ -111,20 +49,11 @@ class BimbinganForm
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->default(
-                                $user->hasRole('mahasiswa')
-                                    ? $user->id
-                                    : null
-                            )
-                            ->disabled(
-                                fn() => $user->hasRole('mahasiswa')
-                            )
-                            ->visible(
-                                fn() => in_array($user->getRoleNames()->first(), ['super_admin', 'dosen', 'mahasiswa'])
-                            )
-                            ->live() // Tambahkan live
+                            ->default($user->hasRole('mahasiswa') ? $user->id : null)
+                            ->disabled(fn() => $user->hasRole('mahasiswa') || $user->hasRole('dosen'))
+                            ->visible(fn() => in_array($user->getRoleNames()->first(), ['super_admin', 'dosen', 'mahasiswa']))
+                            ->live()
                             ->afterStateUpdated(function ($state, $set) use ($user) {
-                                // Hanya untuk super_admin, otomatis isi dosen pembimbing
                                 if ($user->hasRole('super_admin') && $state) {
                                     $mahasiswa = User::find($state);
                                     if ($mahasiswa && $mahasiswa->dosen_pembimbing_id) {
@@ -134,12 +63,11 @@ class BimbinganForm
                             })
                             ->columnSpan(1),
 
-                        // FIELD DOSEN PEMBIMBING
+                        // -------------------- DOSEN PEMBIMBING --------------------
                         Select::make('dosen_id')
                             ->label('Dosen Pembimbing')
                             ->options(function () use ($user) {
                                 $query = User::query();
-
                                 if ($user->hasRole('mahasiswa')) {
                                     $query->where('id', $user->dosen_pembimbing_id);
                                 } elseif ($user->hasRole('dosen')) {
@@ -147,65 +75,53 @@ class BimbinganForm
                                 } elseif ($user->hasRole('super_admin')) {
                                     $query->whereHas('roles', fn($q) => $q->where('name', 'dosen'));
                                 }
-
                                 return $query->pluck('name', 'id');
                             })
                             ->searchable()
                             ->preload()
                             ->nullable()
-                            ->default(
-                                $user->hasRole('mahasiswa')
-                                    ? $user->dosen_pembimbing_id
-                                    : ($user->hasRole('dosen') ? $user->id : null)
-                            )
-                            ->disabled(
-                                fn() => $user->hasRole('mahasiswa') || $user->hasRole('dosen')
-                            )
-                            ->visible(
-                                fn() => in_array($user->getRoleNames()->first(), ['super_admin', 'dosen', 'mahasiswa'])
-                            )
+                            ->default($user->hasRole('mahasiswa') ? $user->dosen_pembimbing_id : ($user->hasRole('dosen') ? $user->id : null))
+                            ->disabled(fn() => $user->hasRole('mahasiswa') || $user->hasRole('dosen'))
+                            ->visible(fn() => in_array($user->getRoleNames()->first(), ['super_admin', 'dosen', 'mahasiswa']))
                             ->columnSpan(1),
 
-                        // TOPIK BIMBINGAN
+                        // -------------------- TOPIK BIMBINGAN --------------------
                         TextInput::make('topik')
                             ->label('Topik Bimbingan')
                             ->maxLength(50)
                             ->required()
                             ->placeholder('Topik bimbingan')
-                            ->columnSpanFull(),
+                            ->columnSpan(2),
 
-                        // JENIS BIMBINGAN
+                        // -------------------- JENIS & TANGGAL BIMBINGAN --------------------
                         Select::make('type')
                             ->label('Jenis Bimbingan')
                             ->options([
-                                'proposal' => 'Proposal',
-                                'skripsi' => 'Skripsi',
-                                'lainnya' => 'Lainnya',
+                                'proposal' => '📄 Proposal',
+                                'skripsi' => '🎓 Skripsi',
+                                'lainnya' => '📝 Lainnya',
                             ])
                             ->required()
                             ->default('proposal')
                             ->placeholder('Jenis bimbingan')
                             ->columnSpan(1),
 
-                        // TANGGAL BIMBINGAN
                         DatePicker::make('tanggal')
                             ->label('Tanggal Bimbingan')
                             ->displayFormat('d/m/Y')
                             ->required()
                             ->default(now())
-                            ->placeholder('Tanggal bimbingan')
                             ->columnSpan(1),
 
-                        // ISI BIMBINGAN
+                        // -------------------- ISI BIMBINGAN --------------------
                         Textarea::make('isi')
                             ->label('Isi/Rincian Bimbingan')
                             ->maxLength(255)
                             ->rows(3)
                             ->required()
-                            ->placeholder('Isi/rincian bimbingan')
                             ->columnSpanFull(),
 
-                        // STATUS BIMBINGAN - UNTUK DOSEN/ADMIN (Select)
+                        // -------------------- STATUS BIMBINGAN --------------------
                         Select::make('status')
                             ->label('Status Bimbingan')
                             ->options([
@@ -219,12 +135,11 @@ class BimbinganForm
                             ->visible($user->hasRole('super_admin') || $user->hasRole('dosen'))
                             ->columnSpan(1),
 
-                        // STATUS BIMBINGAN - HIDDEN UNTUK MAHASISWA
                         Hidden::make('status')
                             ->default('pending')
                             ->visible($user->hasRole('mahasiswa')),
 
-                        // STATUS PROSES - UNTUK DOSEN/ADMIN (Select)
+                        // -------------------- STATUS PROSES --------------------
                         Select::make('status_domen')
                             ->label('Status Proses')
                             ->options([
@@ -240,7 +155,6 @@ class BimbinganForm
                             ->visible($user->hasRole('super_admin') || $user->hasRole('dosen'))
                             ->columnSpan(1),
 
-                        // STATUS PROSES - UNTUK MAHASISWA (TextInput readonly)
                         TextInput::make('status_domen')
                             ->label('Status Proses')
                             ->formatStateUsing(fn($state) => match ($state) {
@@ -253,12 +167,10 @@ class BimbinganForm
                                 default => 'Belum ada status',
                             })
                             ->disabled()
-                            ->visible(
-                                fn($get) => $user->hasRole('mahasiswa') && !empty($get('status_domen'))
-                            )
+                            ->visible(fn($get) => $user->hasRole('mahasiswa') && !empty($get('status_domen')))
                             ->columnSpan(1),
 
-                        // KOMENTAR - UNTUK DOSEN/ADMIN (Textarea enabled)
+                        // -------------------- KOMENTAR --------------------
                         Textarea::make('komentar')
                             ->label('Komentar untuk Mahasiswa')
                             ->maxLength(100)
@@ -267,16 +179,13 @@ class BimbinganForm
                             ->visible($user->hasRole('super_admin') || $user->hasRole('dosen'))
                             ->columnSpanFull(),
 
-                        // KOMENTAR - UNTUK MAHASISWA (Textarea readonly)
                         Textarea::make('komentar')
                             ->label('Komentar Dosen')
                             ->maxLength(100)
                             ->rows(2)
                             ->placeholder('Belum ada komentar dari dosen')
                             ->disabled()
-                            ->visible(
-                                fn($get) => $user->hasRole('mahasiswa') && !empty($get('komentar'))
-                            )
+                            ->visible(fn($get) => $user->hasRole('mahasiswa') && !empty($get('komentar')))
                             ->columnSpanFull(),
                     ]),
             ]);

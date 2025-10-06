@@ -19,9 +19,26 @@ class UsersTable
         return $table
             ->recordUrl(null)
             ->columns([
+                // TextColumn::make('name')
+                //     ->searchable()
+                //     ->sortable(),
                 TextColumn::make('name')
-                    ->searchable()
-                    ->sortable(),
+                    ->label('Nama Lengkap')
+                    ->formatStateUsing(function ($state, $record) {
+                        $roles = $record->roles->pluck('name')->toArray();
+
+                        if (in_array('mahasiswa', $roles) && $record->npm) {
+                            return "{$record->name} - {$record->npm}";
+                        } elseif (in_array('dosen', $roles) && $record->nidn) {
+                            return "{$record->name} - {$record->nidn}";
+                        }
+
+                        return $record->name;
+                    })
+                    ->searchable(['name', 'npm', 'nidn'])
+                    ->sortable(['name'])
+                    ->wrap(),
+
 
                 TextColumn::make('email')
                     ->searchable()
@@ -31,7 +48,7 @@ class UsersTable
                     ->label('Role')
                     ->colors([
                         'primary' => 'super_admin',
-                        'success' => 'dosen', 
+                        'success' => 'dosen',
                         'warning' => 'mahasiswa',
                     ])
                     ->searchable()
@@ -64,7 +81,7 @@ class UsersTable
             ->headerActions([
                 CreateAction::make()
                     ->label('Buat User Baru')
-                    ->icon('heroicon-o-plus') 
+                    ->icon('heroicon-o-plus')
             ])
             ->filters([
                 SelectFilter::make('roles')

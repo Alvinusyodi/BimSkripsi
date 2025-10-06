@@ -86,25 +86,6 @@ class BimbinganResource extends Resource
             ]);
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $query = Bimbingan::query();
-
-        if ($user->hasRole('mahasiswa')) {
-            $query->where('user_id', $user->id);
-        }
-        if ($user->hasRole('dosen')) {
-            $query->where('dosen_id', $user->id)
-                ->orWhereHas('mahasiswa', function ($q) use ($user) {
-                    $q->where('dosen_pembimbing_id', $user->id);
-                });
-        }
-
-        return (string) $query->count();
-    }
-
     public static function shouldRegisterNavigation(): bool
     {
         /** @var \App\Models\User|null $user */

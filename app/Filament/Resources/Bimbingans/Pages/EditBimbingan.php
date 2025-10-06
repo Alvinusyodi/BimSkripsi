@@ -10,6 +10,10 @@ class EditBimbingan extends EditRecord
 {
     protected static string $resource = BimbinganResource::class;
 
+    protected static ?string $title = 'Perbaharui Bimbingan';
+
+    protected static ?string $breadcrumb = 'Perbaharui';
+
     protected function getHeaderActions(): array
     {
         return [

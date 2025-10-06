@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 /**
  * @method bool hasRole(string|array|\Spatie\Permission\Contracts\Role ...$roles)
@@ -13,7 +14,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use HasRoles;
+    use Notifiable, HasRoles;
 
     protected $fillable = [
         'name',
@@ -22,6 +23,8 @@ class User extends Authenticatable
         'status',
         'angkatan',
         'dosen_pembimbing_id',
+        'npm',
+        'nidn',
     ];
 
     protected $hidden = [
@@ -91,5 +94,15 @@ class User extends Authenticatable
     public function getStatusDomenTerverifikasiAttribute()
     {
         return ['fix', 'acc', 'selesai']; 
+    }
+
+    public function laporanSebagaiMahasiswa()
+    {
+        return $this->hasMany(Laporan::class, 'mahasiswa_id');
+    }
+
+    public function laporanSebagaiDosen()
+    {
+        return $this->hasMany(Laporan::class, 'dosen_id');
     }
 }

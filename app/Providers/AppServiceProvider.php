@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Bimbingan;
+use App\Models\Laporan;
+use App\Models\LaporanMingguan;
+use App\Observers\StatusChangeObserver;
 use Illuminate\Support\ServiceProvider;
-use Filament\Facades\Filament;
-use Filament\View\PanelsRenderHook;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,13 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Filament::serving(function () {
-        // Kosongkan logo default / APP_NAME di atas login
-        Filament::registerRenderHook(
-            PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,
-            fn () => '' // hapus output APP_NAME
-        );
-    });
-
+        // Laporan::observe(StatusChangeObserver::class);
+        // Bimbingan::observe(StatusChangeObserver::class);
+        // LaporanMingguan::observe(StatusChangeObserver::class);
     }
 }
